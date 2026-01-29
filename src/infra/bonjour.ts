@@ -82,6 +82,16 @@ export async function startGatewayBonjourAdvertiser(
     return { stop: async () => {} };
   }
 
+  // Some environments (sandboxed CI, restricted containers) block interface enumeration
+  // and will throw from `os.networkInterfaces()`. ciao relies on interface discovery,
+  // so bail out early instead of crashing the gateway.
+  try {
+    os.networkInterfaces();
+  } catch (err) {
+    logWarn(`bonjour: disabled (networkInterfaces unavailable): ${formatBonjourError(err)}`);
+    return { stop: async () => {} };
+  }
+
   const { getResponder, Protocol } = await import("@homebridge/ciao");
   const responder = getResponder();
 

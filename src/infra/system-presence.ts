@@ -39,7 +39,12 @@ function normalizePresenceKey(key: string | undefined): string | undefined {
 }
 
 function resolvePrimaryIPv4(): string | undefined {
-  const nets = os.networkInterfaces();
+  let nets: ReturnType<typeof os.networkInterfaces>;
+  try {
+    nets = os.networkInterfaces();
+  } catch {
+    return undefined;
+  }
   const prefer = ["en0", "eth0"];
   const pick = (names: string[]) => {
     for (const name of names) {
@@ -53,7 +58,7 @@ function resolvePrimaryIPv4(): string | undefined {
     }
     return undefined;
   };
-  return pick(prefer) ?? os.hostname();
+  return pick(prefer);
 }
 
 function initSelfPresence() {
